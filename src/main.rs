@@ -33,8 +33,7 @@ fn backtrack(input: &str, last_modified: usize, output: String) {
     // If the current character is a space, explore two branches: inserting a space or not
     if input.chars().nth(last_modified).unwrap() == ' ' {
         let mut modified_output_with_space = output.clone();
-        modified_output_with_space.push(' ');
-        modified_output_with_space.push(' ');
+        modified_output_with_space.push_str("  "); // Append two spaces
         backtrack(input, last_modified + 1, modified_output_with_space);
     }
     
@@ -69,5 +68,3 @@ fn count_spaces(input: &str) -> usize {
 fn calculate_possible_outputs(amount_of_spaces: usize) -> u32 {
     u32::pow(2, amount_of_spaces as u32)
 }
-
-
