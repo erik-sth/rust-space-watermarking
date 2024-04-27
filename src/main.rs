@@ -9,12 +9,12 @@ fn main() {
     let amount_outputs = calculate_amount_outputs(amount_of_spaces);
 
     // Print the number of spaces and possible outputs
-    println!("Amount of Spaces: {}, Possible Outputs: {}", amount_of_spaces, amount_outputs);
-
+    
     // Perform backtracking and calculate the identifying number
     let mut outputs = Vec::new(); // Initialize an empty vector to store outputs
     backtrack_and_collect(&input, 0, String::new(), &mut outputs);
-    calculate_identifying_number(&outputs[4], amount_of_spaces);
+    let identifier = calculate_identifying_number(&outputs[4], amount_of_spaces);
+    println!("Amount of Spaces: {}, Possible Outputs: {}, Indentifier: {}", amount_of_spaces, amount_outputs, identifier);
 }
 
 // Backtracking function to generate all possible outputs
@@ -75,5 +75,8 @@ fn calculate_amount_outputs(amount_of_spaces: usize) -> u32 {
 
 // Calculate the number of end nodes on the left side of the tree at a given depth
 fn calculate_left_side_end_nodes(index: u32, depth: u32) -> u32 {
+    if depth <= index {
+        return 0; // Prevent overflow by returning 0 if depth is smaller than or equal to index
+    }
     u32::pow(2, depth - index - 1) // -1 to go one tree node down
 }
