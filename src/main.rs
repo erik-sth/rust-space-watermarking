@@ -1,75 +1,79 @@
-/// Main function to generate all possible combinations of inserting spaces into a string.
 fn main() {
+    // Define the input string
     let input = "Rust is installed and managed by the rustup tool.";
 
-    // Count the number of spaces in the input string.
-    let amount_of_spaces = amount_of_spaces(input);
+    // Count the number of spaces in the input string
+    let amount_of_spaces = count_spaces(input);
 
-    // Calculate the total possible outputs based on the number of spaces.
-    let possible_outputs = pow(2, amount_of_spaces);
+    // Calculate the total possible outputs based on the number of spaces
+    let amount_outputs = calculate_amount_outputs(amount_of_spaces);
 
-    // Print the number of spaces and possible outputs.
-    println!("Amount of Spaces: {}, Possible Outputs: {}", amount_of_spaces, possible_outputs);
+    // Print the number of spaces and possible outputs
+    println!("Amount of Spaces: {}, Possible Outputs: {}", amount_of_spaces, amount_outputs);
 
-    // Start the backtracking process.
-    backtrack(input, 0, String::new());
+    // Perform backtracking and calculate the identifying number
+    let mut outputs = Vec::new(); // Initialize an empty vector to store outputs
+    backtrack_and_collect(&input, 0, String::new(), &mut outputs);
+    calculate_identifying_number(&outputs[4], amount_of_spaces);
 }
 
-/// Recursive function to backtrack and generate all possible combinations of inserting spaces.
-///
-/// # Arguments
-///
-/// * `input` - The input string to insert spaces into.
-/// * `last_modified` - The index of the last character modified in the output string.
-/// * `output` - The current output string with spaces inserted.
-fn backtrack(input: &str, last_modified: usize, output: String) {
-    // If all characters in the input string are processed, print the output.
-    if last_modified == input.len() {
-        println!("{}", output);
+// Backtracking function to generate all possible outputs
+fn backtrack_and_collect(input: &str, index: usize, output: String, results: &mut Vec<String>) {
+    // If all characters in the input string are processed, push the output into the results vector
+    if index == input.len() {
+        results.push(output);
         return;
     }
   
-    // If the current character is a space, explore two branches: inserting a space or not.
-    if input.chars().nth(last_modified).unwrap() == ' ' {
+    // If the current character is a space, explore two branches: inserting a space or not
+    if input.chars().nth(index).unwrap() == ' ' {
         let mut modified_output_with_space = output.clone();
-        modified_output_with_space.push(' ');
-        modified_output_with_space.push(' ');
-        backtrack(input, last_modified + 1, modified_output_with_space);
+        modified_output_with_space.push_str("  "); // Append two spaces
+        backtrack_and_collect(input, index + 1, modified_output_with_space, results);
     }
     
-    // Always explore the branch of not inserting a space.
+    // Always explore the branch of not inserting a space
     let mut modified_output_without_space = output.clone();
-    modified_output_without_space.push(input.chars().nth(last_modified).unwrap());
-    backtrack(input, last_modified + 1, modified_output_without_space);
+    modified_output_without_space.push(input.chars().nth(index).unwrap());
+    backtrack_and_collect(input, index + 1, modified_output_without_space, results);
 }
 
-/// Counts the number of spaces in a given string.
-///
-/// # Arguments
-///
-/// * `input` - The input string to count spaces in.
-///
-/// # Returns
-///
-/// The number of spaces in the input string.
-fn amount_of_spaces(input: &str) -> usize {
+// Calculate the identifying number based on the pattern of double spaces
+fn calculate_identifying_number(input: &str, amount_of_spaces: usize) -> u32 {
+    let mut double_spaces = Vec::new();  // Renamed from double_space_indices
+
+    // Find the positions of consecutive double spaces
+    let mut chars = input.chars().peekable();
+    while let Some(character) = chars.next() {
+        if character == ' ' && chars.peek() == Some(&' ') {
+            double_spaces.push(true);
+            chars.next(); // Skip the next space
+        } else {
+            double_spaces.push(false);
+        }
+    }
+
+    // Calculate the identifying number based on the pattern of double spaces
+    let mut identifier = 0;    
+    for (index, is_double_space) in double_spaces.iter().enumerate() {
+        if *is_double_space {    
+            identifier += calculate_left_side_end_nodes(index as u32, amount_of_spaces as u32);
+        }
+    }
+    identifier
+}
+
+// Calculate the number of spaces in the input string
+fn count_spaces(input: &str) -> usize {
     input.chars().filter(|&c| c == ' ').count()
 }
 
-/// Calculates the power of a base raised to an exponent.
-///
-/// # Arguments
-///
-/// * `base` - The base value.
-/// * `exp` - The exponent value.
-///
-/// # Returns
-///
-/// The result of raising the base to the exponent.
-fn pow(base: u32, exp: usize) -> u32 {
-    let mut result = 1;
-    for _ in 0..exp {
-        result *= base;
-    }
-    result
+// Calculate the total possible outputs based on the number of spaces
+fn calculate_amount_outputs(amount_of_spaces: usize) -> u32 {
+    u32::pow(2, amount_of_spaces as u32)
+}
+
+// Calculate the number of end nodes on the left side of the tree at a given depth
+fn calculate_left_side_end_nodes(index: u32, depth: u32) -> u32 {
+    u32::pow(2, depth - index - 1) // -1 to go one tree node down
 }
