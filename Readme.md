@@ -6,4 +6,3 @@ This project explores approaches to create unique texts without the user noticin
 
 ## Identifying
 To identify, you can create...
-
